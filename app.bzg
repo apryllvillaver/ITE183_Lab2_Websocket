@@ -1,0 +1,33 @@
+include("lib/http.bzg");
+
+var server = http(8000);
+
+// Handles HTTP page requests.
+server.get = function (path, data) {
+    print("GET " + path);
+
+    if (path == "/") {
+        server.sendFile("public/index.html");
+    } else {
+        server.sendFile("public/404.html");
+    }
+};
+
+// Runs when a browser establishes a WebSocket connection.
+server.onConnect = function (clientId) {
+    print("WebSocket connected! Client ID: " + clientId);
+    server.send(clientId, "Welcome to the BSL WebSocket server!");
+};
+
+// Receives a message and broadcasts it to every connected client.
+server.onData = function (message, clientId) {
+    print("Received from Client " + clientId + ": " + message);
+    server.sendAll("User " + clientId + " says: " + message);
+};
+
+// Records when a browser disconnects.
+server.onDisconnect = function (clientId) {
+    print("WebSocket disconnected! Client ID: " + clientId);
+};
+
+server.run();
